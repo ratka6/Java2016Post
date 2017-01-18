@@ -1,31 +1,29 @@
 package dataModel;
 
+import javafx.application.Platform;
+
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
-/**
- * Created by krzysiek on 18.01.2017.
- */
-public class ServerCallable implements Callable<ServerResponse> {
+
+
+public class ServerRunnable implements Runnable {
 
     private ServerRequest request;
+    private Consumer<ServerResponse> parse;
 
-    public ServerCallable(ServerRequest request) {
+    public ServerRunnable(ServerRequest request, Consumer<ServerResponse> parse) {
         this.request = request;
+        this.parse = parse;
     }
 
     @Override
-    public ServerResponse call() throws Exception {
-        return send(this.request);
-    }
-
-    public ServerResponse send(ServerRequest request) {
+    public void run() {
         try {
-
             InetAddress serverAddress = InetAddress.getByName("127.0.0.1");
             DatagramSocket socket = new DatagramSocket();
             byte[] dataIn = new byte[1024];
@@ -54,12 +52,14 @@ public class ServerCallable implements Callable<ServerResponse> {
             bais.close();
 
             if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            } else {
-                return null;
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        parse.accept((ServerResponse) object);
+                    }
+                });
+                //parse.accept((ServerResponse) object);
             }
-
-
         } catch (SocketException e) {
             System.out.println("Client Socket error: " + e.getMessage());
             e.printStackTrace();
@@ -70,10 +70,5 @@ public class ServerCallable implements Callable<ServerResponse> {
             System.out.println("Client Classnotfound: " + e.getMessage());
             e.printStackTrace();
         }
-
-
-        return null;
-
-
     }
 }

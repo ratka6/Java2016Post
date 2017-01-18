@@ -17,9 +17,6 @@ import javafx.stage.StageStyle;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 
 /**
  * Created by krzysiek on 07.01.2017.
@@ -74,6 +71,8 @@ public class LoginController extends TabPane implements Initializable {
             }
         });
 
+
+
         registerButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -101,15 +100,12 @@ public class LoginController extends TabPane implements Initializable {
     }
 
     private void sendRequest(ServerRequest request) {
-        ExecutorService exec = Executors.newFixedThreadPool(1);
-        FutureTask<ServerResponse> task = new FutureTask<ServerResponse>(new ServerCallable(request));
-
-        exec.execute(task);
-        exec.shutdown();
-
+        Thread t = new Thread(new ServerRunnable(request, this::parseResponse));
+        t.start();
     }
 
     private void parseResponse(ServerResponse response) {
+
         if (response.responseName.equals("login")) {
             if (response.error == null) {
                 if (response.object != null) {
@@ -138,6 +134,7 @@ public class LoginController extends TabPane implements Initializable {
             infoLabel.setText("Błąd serwera");
             regInfoLabel.setText("Błąd serwera");
         }
+
     }
 
 
