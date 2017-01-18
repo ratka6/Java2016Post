@@ -1,17 +1,19 @@
 package dataModel;
 
+import java.io.Serializable;
+
 /**
  * Created by krzysiek on 18.01.2017.
  */
-public class Package {
-    Double height;
-    Double width;
-    Double length;
-    Double weight;
-    Double cost;
-    String sourceAddress;
-    String destinationAddres;
-    String date;
+public class Package implements Serializable{
+    private Double height;
+    private Double width;
+    private Double length;
+    private Double weight;
+    private Double cost;
+    private String sourceAddress;
+    private String destinationAddres;
+    private String date;
 
     public void setSourceAddress(String sourceAddress) {
         this.sourceAddress = sourceAddress;

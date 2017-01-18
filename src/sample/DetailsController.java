@@ -1,7 +1,7 @@
 package sample;
 
+import dataModel.*;
 import dataModel.Package;
-import dataModel.User;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -13,8 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import java.io.*;
-import java.net.*;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -92,9 +91,8 @@ public class DetailsController implements Initializable {
             pack.setDate(date.toString());
             pack.setDestinationAddres(destinationTextField.getText());
             pack.setSourceAddress(sourceTextField.getText());
-            infoLabel.setText("Kurier zamówiony");
-            cancelButton.setText("Zamknij");
-            System.out.println(pack);
+            ServerRequest request = new ServerRequest("orderCourier", pack);
+            sendRequest(request);
         }
         else {
             infoLabel.setText("Błąd - spróbuj ponownie");
@@ -102,40 +100,26 @@ public class DetailsController implements Initializable {
 
     }
 
-    private boolean orderRequest(Object data) {
-        try {
-            InetAddress serverAddress = InetAddress.getByName("127.0.0.1");
-            DatagramSocket socket = new DatagramSocket();
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            objectOutputStream.writeObject(data);
-            byte bufData[] = byteArrayOutputStream.toByteArray();
-            socket.send(new DatagramPacket(bufData, bufData.length, serverAddress, 1234));
-
-            bufData = new byte[256];
-            DatagramPacket packet = new DatagramPacket(bufData, bufData.length, serverAddress, 1234);
-            socket.receive(packet);
-            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bufData));
-            Object response = ois.readObject();
-            socket.close();
-            System.out.println(response);
-            if (response instanceof User) {
-                user = (User) response;
-                System.out.println(user);
-                return true;
-            }
-            else  {
-                return false;
-            }
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return false;
+    private void sendRequest(ServerRequest request) {
+        Thread t = new Thread(new ServerRunnable(request, this::parseResponse));
+        t.start();
     }
+
+    private void parseResponse(ServerResponse response) {
+        if (response.responseName.equals("orderCourier")) {
+            if (response.error == null) {
+                infoLabel.setText("Zamówiono kuriera!");
+            } else {
+                infoLabel.setText(response.error);
+            }
+            cancelButton.setText("Zamknij");
+            confirmButton.setDisable(true);
+        } else {
+            infoLabel.setText("Błąd serwera");
+        }
+    }
+
+
 
     private void showUser() {
         Thread t = new Thread(new Runnable() {

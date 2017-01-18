@@ -1,15 +1,15 @@
 package sample;
 
-import dataModel.LoginData;
-import dataModel.ServerRequest;
-import dataModel.ServerResponse;
-import dataModel.User;
+import dataModel.*;
+import dataModel.Package;
 
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by krzysiek on 07.01.2017.
@@ -18,60 +18,41 @@ public class Server {
 
     private static LoginData loginData = new LoginData("aa", "aa");
     private static User user = User.fake();
+    private static ArrayList<PackageStatus> statuses;
+
+    public static Double getRandom() {
+        Random r = new Random();
+        return 10.0 + (1000.0 - 10.0) * r.nextDouble();
+    }
 
     public static void main(String[] args) {
-//        try {
-//            DatagramSocket socket = new DatagramSocket(1234);
-//            while(true) {
-//                //odbior obiektu
-//                byte bufA[] = new byte[256];
-//                DatagramPacket packet = new DatagramPacket(bufA, bufA.length);
-//                socket.receive(packet);
-//                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bufA));
-//                Object object = ois.readObject();
-//                System.out.println(object);
-//                //Wysylanie
-//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                ObjectOutputStream oos = new ObjectOutputStream(baos);
-//                ServerResponse response;
-//                if (object instanceof ServerRequest) {
-//                    ServerRequest request = (ServerRequest) object;
-//                    if (request.requestName == "login") {
-//                        LoginData data = (LoginData) request.object;
-//                        if (data.id.equals(loginData.id) && data.password.equals(loginData.password)) {
-//                            response = new ServerResponse("login", user);
-//                            oos.writeObject(response);
-//                        }
-//                        else {
-//                            response = new ServerResponse("login", null);
-//                            response.error = "Błędne dane";
-//                            oos.writeObject(response);
-//                        }
-//                    }
-//                    else if (request.requestName == "register") {
-//                        User data = (User) request.object;
-//                            response = new ServerResponse("register", loginData);
-//                            oos.writeObject(response);
-//                    }
-//                    bufA = baos.toByteArray();
-//                    socket.send(new DatagramPacket(bufA, bufA.length, packet.getAddress(), packet.getPort()));
-//                }
-//            }
-//        } catch (SocketException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();
-//        }
+
+
+        statuses = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            if (i % 4 == 0) {
+                PackageStatus status = new PackageStatus(""+i, "canceled");
+                Package pack = new Package(getRandom(), getRandom(), getRandom(), getRandom(), getRandom());
+                status.setPack(pack);
+                statuses.add(status);
+            }
+            else {
+                PackageStatus status = new PackageStatus(""+i, "delivered");
+                Package pack = new Package(getRandom(), getRandom(), getRandom(), getRandom(), getRandom());
+                status.setPack(pack);
+                statuses.add(status);
+            }
+        }
+
+        System.out.println(statuses);
 
         DatagramSocket socket = null;
         InetAddress inetAddress;
 
         try {
             socket = new DatagramSocket(6000);
-            byte[] dataIn = new byte[1024];
-            byte[] dataOut = new byte[1024];
+            byte[] dataIn = new byte[8096];
+            byte[] dataOut;
             while (true) {
                 DatagramPacket packet = new DatagramPacket(dataIn, dataIn.length);
                 socket.receive(packet);
@@ -84,32 +65,42 @@ public class Server {
                 }
                 byteArrayInputStream.close();
                 objectInputStream.close();
-
-
-                Thread.sleep(5000);
-
                 ServerResponse response;
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(baos);
                 if (object instanceof ServerRequest) {
                     ServerRequest request = (ServerRequest) object;
+
+                    //Login - dodaj bledy
                     if (request.requestName.equals("login")) {
                         LoginData log = (LoginData) request.object;
                         if (log.id.equals(loginData.id) && log.password.equals(loginData.password)) {
-                            response = new ServerResponse("login", user);
+                            response = new ServerResponse(request.requestName, user);
                             oos.writeObject(response);
                             System.out.println("Server: " + response);
                         } else {
-                            response = new ServerResponse("login", null);
+                            response = new ServerResponse(request.requestName, null);
                             response.error = "Błędne dane";
                             oos.writeObject(response);
-                            System.out.println("Server: " + response);
                         }
+
+                    //Register - dodaj bledy
                     } else if (request.requestName.equals("register")) {
                         User u = (User) request.object;
-                        response = new ServerResponse("register", loginData);
+                        response = new ServerResponse(request.requestName, loginData);
                         oos.writeObject(response);
-                        System.out.println("Server: " + response);
+                    }
+
+                    //PackagesInfo - dodaj bledy
+                    else if (request.requestName.equals("packagesInfo")) {
+                        response = new ServerResponse(request.requestName, statuses);
+                        oos.writeObject(response);
+                    }
+
+                    //OrderCourier - dodaj bledy
+                    else if (request.requestName.equals("orderCourier")) {
+                        response = new ServerResponse(request.requestName, null);
+                        oos.writeObject(response);
                     }
 
                     dataOut = baos.toByteArray();
@@ -126,8 +117,6 @@ public class Server {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             System.out.println("Server Classnotfound: " + e.getMessage());
-            e.printStackTrace();
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 

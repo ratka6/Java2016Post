@@ -1,9 +1,11 @@
 package dataModel;
 
+import java.io.Serializable;
+
 /**
  * Created by krzysiek on 07.01.2017.
  */
-public class PackageStatus {
+public class PackageStatus implements Serializable {
     private String id;
     private String status;
     private Package pack;

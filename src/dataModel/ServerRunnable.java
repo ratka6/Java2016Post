@@ -26,8 +26,8 @@ public class ServerRunnable implements Runnable {
         try {
             InetAddress serverAddress = InetAddress.getByName("127.0.0.1");
             DatagramSocket socket = new DatagramSocket();
-            byte[] dataIn = new byte[1024];
-            byte[] dataOut = new byte[1024];
+            byte[] dataIn = new byte[8096];
+            byte[] dataOut;
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(request);

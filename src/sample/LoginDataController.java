@@ -37,6 +37,8 @@ public class LoginDataController implements Initializable {
                 stage.close();
             }
         });
+
+        showUser();
     }
 
     private void showUser() {

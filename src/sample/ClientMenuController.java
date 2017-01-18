@@ -1,8 +1,7 @@
 package sample;
 
 import dataModel.Package;
-import dataModel.PackageStatus;
-import dataModel.User;
+import dataModel.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -25,6 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -102,6 +102,13 @@ public class ClientMenuController implements Initializable {
         numberColumn.setCellValueFactory(new PropertyValueFactory<PackageStatus, String>("id"));
         statusColumn.setCellValueFactory(new PropertyValueFactory<PackageStatus, String>("status"));
 
+
+        tableView.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            int index = tableView.getSelectionModel().selectedIndexProperty().get();
+            showPackage(index);
+        });
+
+
         loadData();
     }
 
@@ -173,15 +180,55 @@ public class ClientMenuController implements Initializable {
     }
 
     private void loadData() {
-        packageStatuses = FXCollections.observableArrayList();
-        for (int i = 0; i < 20; i++) {
-            if (i % 4 == 0) {
-                packageStatuses.add(new PackageStatus(""+i, "canceled"));
+        getPackagesInfo();
+    }
+
+    private void getPackagesInfo() {
+        ServerRequest request = new ServerRequest("packagesInfo", user);
+        sendRequest(request);
+    }
+
+    private void sendRequest(ServerRequest request) {
+        Thread t = new Thread(new ServerRunnable(request, this::parseResponse));
+        t.start();
+    }
+
+    private void parseResponse(ServerResponse response) {
+        if (response.error == null) {
+            if (response.object != null && response.object instanceof ArrayList<?>) {
+
+                packageStatuses = FXCollections.observableArrayList((ArrayList<PackageStatus>)response.object);
+                tableView.setItems(packageStatuses);
+
             }
             else {
-                packageStatuses.add(new PackageStatus("" + i, "delivered"));
+                infoLabel.setText("Błąd serwera");
             }
         }
-        tableView.getItems().addAll(packageStatuses);
+        else if (response.error != null) {
+            infoLabel.setText(response.error);
+        }
+        else {
+            infoLabel.setText("Błąd serwera");
+        }
+    }
+
+    private void showPackage(Integer index) {
+        System.out.println("Index: " + index);
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("PackageDetailsView.fxml"));
+        try {
+            Pane details = (Pane) loader.load();
+            PackageDetailsController controller = loader.getController();
+            controller.setPack(packageStatuses.get(index).getPack());
+            final Stage dialog = new Stage(StageStyle.TRANSPARENT);
+            dialog.initOwner(stage);
+            details.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+            dialog.initModality(Modality.APPLICATION_MODAL);
+            dialog.setScene(new Scene(details, 528, 324));
+            dialog.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
