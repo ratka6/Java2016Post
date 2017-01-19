@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by krzysiek on 19.01.2017.
@@ -40,6 +42,7 @@ public class KurierMenuController implements Initializable {
     private Stage stage;
     private User user;
     private ObservableList<KurierPackageInfo> packageInfos;
+    private Timer timer = new Timer();
 
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -72,11 +75,16 @@ public class KurierMenuController implements Initializable {
             showInfo(index);
         });
 
-        loadData();
+
+
+        timer.schedule(new Refresh(), 15000);
 
     }
 
+
+
     private void loadData() {
+        System.out.println("loadData");
         ServerRequest request = new ServerRequest("kurierPackagesInfo", user);
         sendRequest(request);
     }
@@ -129,4 +137,13 @@ public class KurierMenuController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    class Refresh extends TimerTask {
+        @Override
+        public void run() {
+            System.out.println("Timer action");
+            loadData();
+        }
+    }
 }
+
