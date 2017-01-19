@@ -89,7 +89,9 @@ public class KurierTaskDetailsController implements Initializable {
     }
 
     private void changeStatus() {
-        ServerRequest request = new ServerRequest("changeStatus", info.getId());
+        String current = ((Statuses)statusComboBox.getSelectionModel().getSelectedItem()).getStatus();
+        String[] change = {info.getId(), current};
+        ServerRequest request = new ServerRequest("changeStatus", change);
         sendRequest(request);
     }
 

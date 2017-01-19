@@ -62,3 +62,10 @@ Requests names:
             "Nieznany blad" ?? w sumie nie wiem co tu sie moze stac
 
 
+8. "changeStatus" - zmiana statusu przesylki (Statuses -> enum, mozesz przejrzec)
+    in -> String[] = {id_przesyłki, zmieniony_status}
+    out -> null
+    error:
+        "Nie udalo sie zmienic"
+        "Zmiana na ten sam niemozliwa"
+
