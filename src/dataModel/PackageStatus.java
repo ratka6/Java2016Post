@@ -31,6 +31,12 @@ public class PackageStatus implements Serializable {
         this.status = status;
     }
 
+    public PackageStatus(String id, String status, Package pack) {
+        this.id = id;
+        this.status = status;
+        this.pack = pack;
+    }
+
     @Override
     public String toString() {
         return "PackageStatus{" +

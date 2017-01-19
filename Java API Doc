@@ -1,0 +1,64 @@
+Zrobiłem kilka klas modelu - sa w pakiecie dataModel. Przejrzyj je i jak chcesz coś zmienić to daj znać
+Serwer zrobiłem tak o, trzeba dodać wielowątkowość i połączenie z bazą.
+
+
+ServerRequest {
+    String requestName;
+    Object object;
+}
+
+ServerResponse {
+    String responseName;
+    String error;
+    Object object;
+}
+
+Requests names:
+1. "login" - logowanie
+    in -> LoginData
+    out -> User
+    error:
+        "Niepoprawne dane"
+        "Brak konta"
+    
+2. "register" - rejestracja
+    in -> User
+    out -> LoginData
+    error:
+        "Niepoprawne dane"
+        "Konto istnieje"
+        
+3. "packagesInfo" - wszystkie paczki uzytkownika
+    in -> User
+    out -> ArrayList<PackageStatuses>
+    error:
+        "Nieznany blad" ?? w sumie nie wiem co tu sie moze stac
+
+4. "orderCourier" - zamow kuriera do paczki
+    in -> Package
+    out -> null
+    error:
+        "Brak kuriera"
+        "Nieznany blad"
+
+5. "kurierRegister" - rejestracja kuriera
+    in -> User
+    out -> LoginData
+    error:
+            "Niepoprawne dane"
+            "Konto istnieje"
+
+6. "kurierLogin" - logowanie kuriera
+    in -> LoginData
+    out -> User
+    error:
+            "Niepoprawne dane"
+            "Brak konta"
+
+7. "kurierPackagesInfo" - wszystkie zadania kuriera
+    in -> User
+    out -> ArrayList<KurierPackageInfo>
+    error:
+            "Nieznany blad" ?? w sumie nie wiem co tu sie moze stac
+
+

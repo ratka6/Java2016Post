@@ -113,7 +113,6 @@ public class ClientMenuController implements Initializable {
     }
 
     private void order() {
-        System.out.println("Order");
         showDetails();
     }
 
