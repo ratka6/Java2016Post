@@ -1,4 +1,4 @@
-package sample;
+package klient;
 
 import dataModel.*;
 import javafx.event.ActionEvent;
