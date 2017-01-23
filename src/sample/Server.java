@@ -7,9 +7,13 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by krzysiek on 07.01.2017.
@@ -45,81 +49,27 @@ public class Server {
         }
 
         System.out.println(statuses);
-
-        DatagramSocket socket = null;
-        InetAddress inetAddress;
-
+        ServerSocket serverSocket = null;
+    	ExecutorService executorService = Executors.newCachedThreadPool();
         try {
-            socket = new DatagramSocket(6000);
-            byte[] dataIn = new byte[8096];
-            byte[] dataOut;
+            serverSocket = new ServerSocket(6666);
+            System.out.println("tu1");
             while (true) {
-                DatagramPacket packet = new DatagramPacket(dataIn, dataIn.length);
-                socket.receive(packet);
-                byte[] data = packet.getData();
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-                ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-                Object object = objectInputStream.readObject();
-                if (object instanceof ServerRequest) {
-                    System.out.println("Server: " + (ServerRequest)object);
-                }
-                byteArrayInputStream.close();
-                objectInputStream.close();
-                ServerResponse response;
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos);
-                if (object instanceof ServerRequest) {
-                    ServerRequest request = (ServerRequest) object;
-
-                    //Login - dodaj bledy
-                    if (request.requestName.equals("login")) {
-                        LoginData log = (LoginData) request.object;
-                        if (log.id.equals(loginData.id) && log.password.equals(loginData.password)) {
-                            response = new ServerResponse(request.requestName, user);
-                            oos.writeObject(response);
-                            System.out.println("Server: " + response);
-                        } else {
-                            response = new ServerResponse(request.requestName, null);
-                            response.error = "Błędne dane";
-                            oos.writeObject(response);
-                        }
-
-                    //Register - dodaj bledy
-                    } else if (request.requestName.equals("register")) {
-                        User u = (User) request.object;
-                        response = new ServerResponse(request.requestName, loginData);
-                        oos.writeObject(response);
-                    }
-
-                    //PackagesInfo - dodaj bledy
-                    else if (request.requestName.equals("packagesInfo")) {
-                        response = new ServerResponse(request.requestName, statuses);
-                        oos.writeObject(response);
-                    }
-
-                    //OrderCourier - dodaj bledy
-                    else if (request.requestName.equals("orderCourier")) {
-                        response = new ServerResponse(request.requestName, null);
-                        oos.writeObject(response);
-                    }
-
-                    dataOut = baos.toByteArray();
-                    socket.send(new DatagramPacket(dataOut, dataOut.length, packet.getAddress(), packet.getPort()));
-                }
-                oos.close();
-                baos.close();
+                System.out.println("tu2");
+                Socket socket = serverSocket.accept();
+                executorService.execute(new ServerTask(socket));
             }
-        } catch (SocketException e) {
+        }
+        catch (SocketException e) {
             System.out.println("Server Socket error: " + e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
             System.out.println("Server IOError: " + e.getMessage());
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            System.out.println("Server Classnotfound: " + e.getMessage());
-            e.printStackTrace();
         }
-
-
+        finally {
+			executorService.shutdown();
+		}
     }
+         
 }
