@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="kurier.KurierMenuController">
+  <tabs>
+    <Tab text="Akutalne zadania">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <TableView fx:id="tableView" layoutX="18.0" layoutY="18.0" prefHeight="331.0" prefWidth="565.0" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="18.0" AnchorPane.rightAnchor="17.0" AnchorPane.topAnchor="18.0">
+                    <columns>
+                      <TableColumn fx:id="idColumn" prefWidth="101.0" text="ID" />
+                      <TableColumn fx:id="statusColumn" prefWidth="123.0" text="Status" />
+                        <TableColumn fx:id="sourceColumn" prefWidth="166.0" text="Adres nadawcy" />
+                        <TableColumn fx:id="destinationColumn" prefWidth="174.0" text="Adres odbiorcy" />
+                    </columns>
+                  </TableView>
+               </children></AnchorPane>
+      </content>
+    </Tab>
+    <Tab text="Wyloguj">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <Button fx:id="logoutButton" layoutX="266.0" layoutY="170.0" mnemonicParsing="false" text="Wyloguj" AnchorPane.bottomAnchor="170.0" AnchorPane.leftAnchor="266.0" AnchorPane.rightAnchor="266.0" AnchorPane.topAnchor="170.0" />
+               </children></AnchorPane>
+      </content>
+    </Tab>
+  </tabs>
+</TabPane>
