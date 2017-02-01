@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Random;
 
+import dataModel.ChangeStatus;
 import dataModel.KurierPackageInfo;
 import dataModel.LoginData;
 import dataModel.Package;
@@ -169,15 +170,15 @@ public class DBConnector {
 		return null;
 	}
 	
-	public ServerResponse changeStatus(String[] change){
+	public ServerResponse changeStatus(ChangeStatus changeStatus){
 		try {
-			ResultSet resultSet = statement.executeQuery("SELECT * FROM package WHERE package.id = '"+Integer.parseInt(change[0])+"'");
+			ResultSet resultSet = statement.executeQuery("SELECT * FROM package WHERE package.id = '"+Integer.parseInt(changeStatus.getId())+"'");
 			if(resultSet.next()){
-				if(resultSet.getString("status").equals("Statuses."+change[1])){
+				if(resultSet.getString("status").equals("Statuses."+changeStatus.getStatus())){
 					return new ServerResponse("error", null);
 				}
 				else{
-					statement.executeUpdate("UPDATE `package` SET `status` = '"+change[1]+"' WHERE `package`.`id` = "+Integer.parseInt(change[0])+";");
+					statement.executeUpdate("UPDATE `package` SET `status` = '"+changeStatus.getStatus()+"' WHERE `package`.`id` = "+Integer.parseInt(changeStatus.getId())+";");
 				}
 			}
 		} catch (SQLException e) {

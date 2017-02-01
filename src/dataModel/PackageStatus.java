@@ -25,11 +25,11 @@ public class PackageStatus implements Serializable {
      
 
     public String getStatuses() {
-		return statuses.toString();
+		return this.statuses.name();
 	}
 
-	public void setStatuses(Statuses statuses) {
-		this.statuses = statuses;
+	public void setStatuses(String statuses) {
+		this.statuses = Statuses.valueOf(statuses);
 	}
 
 	public PackageStatus(String id, Statuses statuses){
@@ -45,9 +45,7 @@ public class PackageStatus implements Serializable {
 
 	public PackageStatus(String id, String status, Package package1) {
 		this.id = id;
-		System.out.println(status);
-		this.statuses = statuses.getStatusByString("U kuriera");
-		System.out.println(statuses);
+		this.statuses = Statuses.valueOf(status);
 		this.pack = package1;
 	}
 

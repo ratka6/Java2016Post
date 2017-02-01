@@ -101,7 +101,7 @@ public class LoginController extends TabPane implements Initializable {
     }
 
     private void sendRequest(ServerRequest request) {
-        Thread t = new Thread(new ServerRunnable(request, this::parseResponse));
+        Thread t = new Thread(new KurierServerRunnable(request, this::parseResponse));
         t.start();
     }
 

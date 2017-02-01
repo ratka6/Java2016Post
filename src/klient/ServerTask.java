@@ -8,6 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import dataModel.ChangeStatus;
 import dataModel.LoginData;
 import dataModel.Package;
 import dataModel.ServerRequest;
@@ -53,7 +54,6 @@ public class ServerTask implements Runnable {
 			    LoginData log = (LoginData) request.object;
 			    response = dbConnector.login(log);
 			    objectOutputStream.writeObject(response);
-				System.out.println(response);
 			} else if (request.requestName.equals("register")) {
 			    User u = (User) request.object;
 			    response = dbConnector.register(u);
@@ -61,10 +61,8 @@ public class ServerTask implements Runnable {
 			}
 			else if (request.requestName.equals("packagesInfo")) {
 			    User u = (User) request.object;
-			    System.out.println(u);
 			    response = dbConnector.packagesInfo(u);
 				objectOutputStream.writeObject(response);
-				System.out.println(response);
 			}
 			else if (request.requestName.equals("orderCourier")) {
 				Package package1 = (Package) request.object;
@@ -88,8 +86,9 @@ public class ServerTask implements Runnable {
 				
 			}
 			else if(request.requestName.equals("changeStatus")){
-				String[] change = (String[]) request.object;
-				response = dbConnector.changeStatus(change);
+				ChangeStatus changeStatus = (ChangeStatus) request.object;
+				System.out.println(changeStatus);
+				response = dbConnector.changeStatus(changeStatus);
 				objectOutputStream.writeObject(response);
 			}
 		}

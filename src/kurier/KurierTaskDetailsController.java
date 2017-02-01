@@ -1,6 +1,7 @@
 package kurier;
 
 import dataModel.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -15,6 +16,8 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by krzysiek on 19.01.2017.
@@ -33,6 +36,8 @@ public class KurierTaskDetailsController implements Initializable {
     @FXML private Button changeStatusButton;
     @FXML private Label infoLabel;
     @FXML private ChoiceBox<Statuses> statusComboBox;
+    
+    private Timer timer = new Timer();
 
     private KurierPackageInfo info;
     private ObservableList<Statuses> statuses = FXCollections.observableArrayList(
@@ -63,42 +68,42 @@ public class KurierTaskDetailsController implements Initializable {
                 changeStatus();
             }
         });
-        
-        loadData();
+        timer.schedule(new Refresh(), 100);
 
     }
 
     private void loadData() {
-        Thread t = new Thread(new Runnable() {
+    	Platform.runLater(new Runnable() {
             @Override
             public void run() {
+            	System.out.println(info);
                 while(info == null){}
                 statusComboBox.setItems(statuses);
                 heightLabel.setText(String.format("%.2f cm", info.getPackageStatus().getPack().getHeight()));
                 widthLabel.setText(String.format("%.2f cm", info.getPackageStatus().getPack().getWidth()));
                 lengthLabel.setText(String.format("%.2f cm", info.getPackageStatus().getPack().getLength()));
                 weightLabel.setText(String.format("%.2f g", info.getPackageStatus().getPack().getWeight()));
-                nameLabel.setText(String.format("%.2f zł", info.getUser().getName()));
-                sourceLabel.setText(info.getSource());
-                destinationLabel.setText(info.getDestination());
+                nameLabel.setText(info.getUser().getName());
+                sourceLabel.setText(info.getPackageStatus().getPack().getSourceAddress());
+                destinationLabel.setText(info.getPackageStatus().getPack().getDestinationAddres());
                 dateLabel.setText(info.getPackageStatus().getPack().getDate());
-                int index = statuses.indexOf(Statuses.getStatusByString(info.getStatus()));
+                int index = statuses.indexOf(info.getStatus());
                 statusComboBox.getSelectionModel().select(index);
             }
         });
-        t.start();
-
     }
 
     private void changeStatus() {
-        String current = ((Statuses)statusComboBox.getSelectionModel().getSelectedItem()).getStatus();
-        String[] change = {info.getId(), current};
-        ServerRequest request = new ServerRequest("changeStatus", change);
+        String current = statusComboBox.getSelectionModel().getSelectedItem().toString();
+        ServerRequest request = new ServerRequest("changeStatus", new ChangeStatus(info.getId(), current));
+        System.out.println(request.requestName);
+        System.out.println(request.object);
         sendRequest(request);
     }
 
     private void sendRequest(ServerRequest request) {
-        Thread t = new Thread(new ServerRunnable(request, this::parseResponse));
+        Thread t = new Thread(new KurierServerRunnable(request, this::parseResponse));
+        t.start();
     }
 
     private void parseResponse(ServerResponse response) {
@@ -111,5 +116,12 @@ public class KurierTaskDetailsController implements Initializable {
         }
     }
 
+    class Refresh extends TimerTask {
+        @Override
+        public void run() {
+            System.out.println("Timer action");
+            loadData();
+        }
+    }
 
 }

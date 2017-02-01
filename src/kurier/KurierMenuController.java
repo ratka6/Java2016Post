@@ -19,6 +19,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.net.URL;
@@ -90,7 +91,7 @@ public class KurierMenuController implements Initializable {
     }
 
     private void sendRequest(ServerRequest request) {
-        Thread t = new Thread(new ServerRunnable(request, this::parseResponse));
+        Thread t = new Thread(new KurierServerRunnable(request, this::parseResponse));
         t.start();
     }
 
@@ -109,15 +110,23 @@ public class KurierMenuController implements Initializable {
         try {
             Pane details = (Pane) loader.load();
             KurierTaskDetailsController controller = loader.getController();
-
-            //set
-
+            controller.setInfo(packageInfos.get(index));
             final Stage dialog = new Stage(StageStyle.TRANSPARENT);
             dialog.initOwner(stage);
             details.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
             dialog.initModality(Modality.APPLICATION_MODAL);
             dialog.setScene(new Scene(details, 528, 380));
             dialog.showAndWait();
+            dialog.setOnCloseRequest(new EventHandler<WindowEvent>() {
+
+				@Override
+				public void handle(WindowEvent event) {
+					packageInfos.removeAll(packageInfos);
+					loadData();
+				}
+            	
+            	
+			});
         } catch (IOException e) {
             e.printStackTrace();
         }

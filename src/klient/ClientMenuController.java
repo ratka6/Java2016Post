@@ -102,7 +102,7 @@ public class ClientMenuController implements Initializable {
         tableView.setEditable(false);
 
         numberColumn.setCellValueFactory(new PropertyValueFactory<PackageStatus, String>("id"));
-        statusColumn.setCellValueFactory(new PropertyValueFactory<PackageStatus, String>("status"));
+        statusColumn.setCellValueFactory(new PropertyValueFactory<PackageStatus, String>("statuses"));
 
 
         tableView.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
